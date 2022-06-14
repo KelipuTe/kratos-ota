@@ -1,0 +1,85 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Ota API
+    version: 0.0.1
+paths:
+    /ota/get_hotel_room_type:
+        get:
+            tags:
+                - Ota
+            operationId: Ota_GetHotelRoomType
+            parameters:
+                - name: ota
+                  in: query
+                  schema:
+                    type: string
+                - name: hotelId
+                  in: query
+                  schema:
+                    type: string
+                - name: roomTypeId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ota.v1.GetHotelRoomTypeReply'
+    /ota/list_hotel_room_type:
+        get:
+            tags:
+                - Ota
+            operationId: Ota_ListHotelRoomType
+            parameters:
+                - name: ota
+                  in: query
+                  schema:
+                    type: string
+                - name: hotelId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ota.v1.ListHotelRoomTypeReply'
+components:
+    schemas:
+        ota.v1.GetHotelRoomTypeReply:
+            type: object
+            properties:
+                ota:
+                    type: string
+                hotelId:
+                    type: string
+                roomType:
+                    $ref: '#/components/schemas/ota.v1.RoomType'
+        ota.v1.ListHotelRoomTypeReply:
+            type: object
+            properties:
+                ota:
+                    type: string
+                hotelId:
+                    type: string
+                roomTypeList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ota.v1.RoomType'
+        ota.v1.RoomType:
+            type: object
+            properties:
+                roomTypeId:
+                    type: string
+                roomTypeName:
+                    type: string
+tags:
+    - name: Ota

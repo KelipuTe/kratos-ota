@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package ota.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "ota/api/ota/v1;v1";
+
+service Ota {
+    rpc GetHotelRoomType (GetHotelRoomTypeRequest) returns (GetHotelRoomTypeReply) {
+        option (google.api.http) = {
+            get: "/ota/get_hotel_room_type"
+        };
+    }
+
+    rpc ListHotelRoomType (ListHotelRoomTypeRequest) returns (ListHotelRoomTypeReply) {
+        option (google.api.http) = {
+            get: "/ota/list_hotel_room_type"
+        };
+    }
+}
+
+message RoomType {
+    string room_type_id = 1;
+    string room_type_name = 2;
+}
+
+message GetHotelRoomTypeRequest {
+     string ota = 1;
+     string hotel_id = 2;
+     string room_type_id = 3;
+}
+
+message GetHotelRoomTypeReply {
+    string ota = 1;
+    string hotel_id = 2;
+    RoomType room_type = 3;
+}
+
+message ListHotelRoomTypeRequest {
+     string ota = 1;
+     string hotel_id = 2;
+}
+
+message ListHotelRoomTypeReply {
+    string ota = 1;
+    string hotel_id = 2;
+    repeated RoomType room_type_list = 3;
+}

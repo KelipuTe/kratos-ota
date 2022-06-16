@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/errors"
 	v1 "kratos-learning/api/ota/v1"
 	"kratos-learning/internal/biz"
 )
@@ -18,6 +19,23 @@ func NewOtaService(ouc *biz.OtaUsecase) *OtaService {
 	return &OtaService{ouc: ouc}
 }
 
+func (s *OtaService) GetToken(ctx context.Context, in *v1.GetTokenRequest) (*v1.GetTokenReply, error) {
+	p1t := &biz.Token{
+		ClientId:     in.ClientId,
+		ClientSecret: in.ClientSecret,
+	}
+
+	err := s.ouc.GetToken(ctx, p1t)
+	if err != nil {
+		return nil, errors.New(500, err.Error(), err.Error())
+	}
+
+	return &v1.GetTokenReply{
+		ClientId: p1t.ClientId,
+		Token:    p1t.Token,
+	}, nil
+}
+
 func (s *OtaService) GetHotelRoomType(ctx context.Context, in *v1.GetHotelRoomTypeRequest) (*v1.GetHotelRoomTypeReply, error) {
 	p1h := &biz.Hotel{
 		Ota:     in.Ota,
@@ -29,7 +47,7 @@ func (s *OtaService) GetHotelRoomType(ctx context.Context, in *v1.GetHotelRoomTy
 	err := s.ouc.GetHotelRoomType(ctx, p1h)
 
 	if err != nil {
-
+		return nil, errors.New(500, err.Error(), err.Error())
 	}
 
 	return &v1.GetHotelRoomTypeReply{

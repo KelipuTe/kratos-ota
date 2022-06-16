@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OtaClient interface {
+	GetToken(ctx context.Context, in *GetTokenRequest, opts ...grpc.CallOption) (*GetTokenReply, error)
 	GetHotelRoomType(ctx context.Context, in *GetHotelRoomTypeRequest, opts ...grpc.CallOption) (*GetHotelRoomTypeReply, error)
 	ListHotelRoomType(ctx context.Context, in *ListHotelRoomTypeRequest, opts ...grpc.CallOption) (*ListHotelRoomTypeReply, error)
 }
@@ -32,6 +33,15 @@ type otaClient struct {
 
 func NewOtaClient(cc grpc.ClientConnInterface) OtaClient {
 	return &otaClient{cc}
+}
+
+func (c *otaClient) GetToken(ctx context.Context, in *GetTokenRequest, opts ...grpc.CallOption) (*GetTokenReply, error) {
+	out := new(GetTokenReply)
+	err := c.cc.Invoke(ctx, "/ota.v1.Ota/GetToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *otaClient) GetHotelRoomType(ctx context.Context, in *GetHotelRoomTypeRequest, opts ...grpc.CallOption) (*GetHotelRoomTypeReply, error) {
@@ -56,6 +66,7 @@ func (c *otaClient) ListHotelRoomType(ctx context.Context, in *ListHotelRoomType
 // All implementations must embed UnimplementedOtaServer
 // for forward compatibility
 type OtaServer interface {
+	GetToken(context.Context, *GetTokenRequest) (*GetTokenReply, error)
 	GetHotelRoomType(context.Context, *GetHotelRoomTypeRequest) (*GetHotelRoomTypeReply, error)
 	ListHotelRoomType(context.Context, *ListHotelRoomTypeRequest) (*ListHotelRoomTypeReply, error)
 	mustEmbedUnimplementedOtaServer()
@@ -65,6 +76,9 @@ type OtaServer interface {
 type UnimplementedOtaServer struct {
 }
 
+func (UnimplementedOtaServer) GetToken(context.Context, *GetTokenRequest) (*GetTokenReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetToken not implemented")
+}
 func (UnimplementedOtaServer) GetHotelRoomType(context.Context, *GetHotelRoomTypeRequest) (*GetHotelRoomTypeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHotelRoomType not implemented")
 }
@@ -82,6 +96,24 @@ type UnsafeOtaServer interface {
 
 func RegisterOtaServer(s grpc.ServiceRegistrar, srv OtaServer) {
 	s.RegisterService(&Ota_ServiceDesc, srv)
+}
+
+func _Ota_GetToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OtaServer).GetToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ota.v1.Ota/GetToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OtaServer).GetToken(ctx, req.(*GetTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Ota_GetHotelRoomType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -127,6 +159,10 @@ var Ota_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "ota.v1.Ota",
 	HandlerType: (*OtaServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetToken",
+			Handler:    _Ota_GetToken_Handler,
+		},
 		{
 			MethodName: "GetHotelRoomType",
 			Handler:    _Ota_GetHotelRoomType_Handler,

@@ -39,7 +39,7 @@ func (r *roomTypeRepo) GetHotelRoomType(ctx context.Context, p1h *biz.Hotel) err
 		HotelId:    p1h.HotelId,
 		RoomTypeId: p1h.Arr1RoomType[0].RoomTypeId,
 	}
-	r.data.db.Where(p1rt).Find(p1rt)
+	r.data.db.Where(p1rt).First(p1rt)
 	p1h.Arr1RoomType[0].RoomTypeName = p1rt.RoomTypeName
 	return nil
 }

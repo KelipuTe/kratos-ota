@@ -17,18 +17,40 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationOtaGetToken = "/ota.v1.Ota/GetToken"
 const OperationOtaGetHotelRoomType = "/ota.v1.Ota/GetHotelRoomType"
 const OperationOtaListHotelRoomType = "/ota.v1.Ota/ListHotelRoomType"
 
 type OtaHTTPServer interface {
 	GetHotelRoomType(context.Context, *GetHotelRoomTypeRequest) (*GetHotelRoomTypeReply, error)
+	GetToken(context.Context, *GetTokenRequest) (*GetTokenReply, error)
 	ListHotelRoomType(context.Context, *ListHotelRoomTypeRequest) (*ListHotelRoomTypeReply, error)
 }
 
 func RegisterOtaHTTPServer(s *http.Server, srv OtaHTTPServer) {
 	r := s.Route("/")
-	r.GET("/ota/get_hotel_room_type", _Ota_GetHotelRoomType0_HTTP_Handler(srv))
-	r.GET("/ota/list_hotel_room_type", _Ota_ListHotelRoomType0_HTTP_Handler(srv))
+	r.POST("/api/v1/get_token", _Ota_GetToken0_HTTP_Handler(srv))
+	r.GET("/api/v1/ota/get_hotel_room_type", _Ota_GetHotelRoomType0_HTTP_Handler(srv))
+	r.GET("/api/v1/ota/list_hotel_room_type", _Ota_ListHotelRoomType0_HTTP_Handler(srv))
+}
+
+func _Ota_GetToken0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTokenRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOtaGetToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetToken(ctx, req.(*GetTokenRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetTokenReply)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _Ota_GetHotelRoomType0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Context) error {
@@ -71,6 +93,7 @@ func _Ota_ListHotelRoomType0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Conte
 
 type OtaHTTPClient interface {
 	GetHotelRoomType(ctx context.Context, req *GetHotelRoomTypeRequest, opts ...http.CallOption) (rsp *GetHotelRoomTypeReply, err error)
+	GetToken(ctx context.Context, req *GetTokenRequest, opts ...http.CallOption) (rsp *GetTokenReply, err error)
 	ListHotelRoomType(ctx context.Context, req *ListHotelRoomTypeRequest, opts ...http.CallOption) (rsp *ListHotelRoomTypeReply, err error)
 }
 
@@ -84,7 +107,7 @@ func NewOtaHTTPClient(client *http.Client) OtaHTTPClient {
 
 func (c *OtaHTTPClientImpl) GetHotelRoomType(ctx context.Context, in *GetHotelRoomTypeRequest, opts ...http.CallOption) (*GetHotelRoomTypeReply, error) {
 	var out GetHotelRoomTypeReply
-	pattern := "/ota/get_hotel_room_type"
+	pattern := "/api/v1/ota/get_hotel_room_type"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationOtaGetHotelRoomType))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -95,9 +118,22 @@ func (c *OtaHTTPClientImpl) GetHotelRoomType(ctx context.Context, in *GetHotelRo
 	return &out, err
 }
 
+func (c *OtaHTTPClientImpl) GetToken(ctx context.Context, in *GetTokenRequest, opts ...http.CallOption) (*GetTokenReply, error) {
+	var out GetTokenReply
+	pattern := "/api/v1/get_token"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationOtaGetToken))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 func (c *OtaHTTPClientImpl) ListHotelRoomType(ctx context.Context, in *ListHotelRoomTypeRequest, opts ...http.CallOption) (*ListHotelRoomTypeReply, error) {
 	var out ListHotelRoomTypeReply
-	pattern := "/ota/list_hotel_room_type"
+	pattern := "/api/v1/ota/list_hotel_room_type"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationOtaListHotelRoomType))
 	opts = append(opts, http.PathTemplate(pattern))

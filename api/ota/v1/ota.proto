@@ -7,17 +7,32 @@ import "google/api/annotations.proto";
 option go_package = "ota/api/ota/v1;v1";
 
 service Ota {
+    rpc GetToken (GetTokenRequest) returns (GetTokenReply) {
+        option (google.api.http) = {
+            post: "/api/v1/get_token"
+            body:"*"
+        };
+    }
     rpc GetHotelRoomType (GetHotelRoomTypeRequest) returns (GetHotelRoomTypeReply) {
         option (google.api.http) = {
-            get: "/ota/get_hotel_room_type"
+            get: "/api/v1/ota/get_hotel_room_type"
         };
     }
-
     rpc ListHotelRoomType (ListHotelRoomTypeRequest) returns (ListHotelRoomTypeReply) {
         option (google.api.http) = {
-            get: "/ota/list_hotel_room_type"
+            get: "/api/v1/ota/list_hotel_room_type"
         };
     }
+}
+
+message GetTokenRequest {
+    string client_id = 1;
+    string client_secret = 2;
+}
+
+message GetTokenReply {
+    string client_id = 1;
+    string token = 2;
 }
 
 message RoomType {
@@ -26,9 +41,9 @@ message RoomType {
 }
 
 message GetHotelRoomTypeRequest {
-     string ota = 1;
-     string hotel_id = 2;
-     string room_type_id = 3;
+    string ota = 1;
+    string hotel_id = 2;
+    string room_type_id = 3;
 }
 
 message GetHotelRoomTypeReply {
@@ -38,8 +53,8 @@ message GetHotelRoomTypeReply {
 }
 
 message ListHotelRoomTypeRequest {
-     string ota = 1;
-     string hotel_id = 2;
+    string ota = 1;
+    string hotel_id = 2;
 }
 
 message ListHotelRoomTypeReply {

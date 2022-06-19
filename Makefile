@@ -34,7 +34,7 @@ api:
 .PHONY: wire
 # wire
 wire:
-	cd cmd/kratos-learning && wire
+	cd cmd/kratos-ota && wire
 
 .PHONY: build
 # build

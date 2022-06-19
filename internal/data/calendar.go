@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"kratos-learning/internal/biz"
+	"kratos-ota/internal/biz"
 )
 
 type calendarRepo struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	v1 "kratos-learning/api/ota/v1"
-	"kratos-learning/internal/conf"
-	"kratos-learning/internal/pkg/middleware/auth"
+	v1 "kratos-ota/api/ota/v1"
+	"kratos-ota/internal/conf"
+	"kratos-ota/internal/pkg/middleware/auth"
 )
 
 var (

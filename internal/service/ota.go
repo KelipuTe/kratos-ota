@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
-	v1 "kratos-learning/api/ota/v1"
-	"kratos-learning/internal/biz"
+	v1 "kratos-ota/api/ota/v1"
+	"kratos-ota/internal/biz"
 )
 
 type OtaService struct {
@@ -58,4 +59,8 @@ func (s *OtaService) GetHotelRoomType(ctx context.Context, in *v1.GetHotelRoomTy
 			RoomTypeName: p1h.Arr1RoomType[0].RoomTypeName,
 		},
 	}, nil
+}
+
+func (s *OtaService) CalendarJob()  {
+	fmt.Println("CalendarJob")
 }

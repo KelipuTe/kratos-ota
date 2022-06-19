@@ -1,51 +1,38 @@
-# Kratos Project Template
+## 微服务架构改造方案及原型
 
-## Install Kratos
-```
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
-```
-## Create a service
-```
-# Create a template project
-kratos new server
+### 简要说明
 
-cd server
-# Add a proto template
-kratos proto add api/server/server.proto
-# Generate the proto code
-kratos proto client api/server/server.proto
-# Generate the source code of service by proto file
-kratos proto server api/server/server.proto -t internal/service
+需要改造的现有业务系统的主要工作是处理 n 个渠道对 m 个渠道的数据同步。
 
-go generate ./...
-go build -o ./bin/ ./...
-./bin/server -conf ./configs
-```
-## Generate other auxiliary files by Makefile
-```
-# Download and update dependencies
-make init
-# Generate API files (include: pb.go, http, grpc, validate, swagger) by proto file
-make api
-# Generate all files
-make all
-```
-## Automated Initialization (wire)
-```
-# install wire
-go get github.com/google/wire/cmd/wire
+现有业务系统是分布式的巨石架构，分了几个部分但是每个部分依然是巨石架构。
 
-# generate wire
-cd cmd/server
-wire
-```
+上述数据同步集中在其中一个巨石架构系统中，随着业务量的增加，其迭代和部署变得愈发很困难。
 
-## Docker
-```bash
-# build
-docker build -t <your-docker-image-name> .
+现在想将这个系统使用微服务架构进行改造。这里使用 kratos 框架实现了一个简易原型以验证可行性。
 
-# run
-docker run --rm -p 8000:8000 -p 9000:9000 -v </path/to/your/configs>:/data/conf <your-docker-image-name>
-```
+### 毕业项目
 
+> 对当下自己项目中的业务，进行一个微服务改造，需要考虑如下技术点：
+
+- 微服务架构（BFF、Service、Admin、Job、Task 分模块）
+- API 设计（包括 API 定义、错误码规范、Error 的使用）
+- gRPC 的使用
+- Go 项目工程化（项目结构、DI、代码分层、ORM 框架）
+- 并发的使用（errgroup 的并行链路请求）
+- 微服务中间件的使用（ELK、Opentracing、Prometheus、Kafka）
+- 缓存的使用优化（一致性处理、Pipeline 优化）
+
+#### 改造方案涉及的技术点
+
+毕业项目的技术点在改进方案中都可以使用，但是有几个部分并不是必须的，现阶段有些冗余。
+
+- 改造的目标系统主要是数据同步，Service、Admin、Job、Task 都是需要的，但是没有明显的 BFF 层的需求。
+- API 需要重新设计，现有系统的 API 非常混乱，重复的、不合理的 API 非常多。
+- 现有 API 全部为 HTTP，对于管理后台和监控服务的大量的频繁的操作，可以使用 gRPC 减轻频繁创建 TCP 连接的压力。
+- 原有系统模块划分不明确，有大量重复的功能代码块，需要重新分模块。
+- 原有系统的数据同步设计，基本没有使用并发，按渠道划分之后，全部是单线程操作，同步效率非常低。
+  - 改进方案可以把同步任务分得更细一点，借助 errgroup 可以对于同一数据主体的数据进行批量同步。
+- 原有系统没有使用中间件，全部是数据库和文件操作，导致项目模块之间耦合度非常高。
+  - 改进方案使用消息中间件，将必须同步完成的数据同步和不需要同步完成的数据同步分离，目标是使用 kafka 的消息订阅，这里先用 redis 的消息订阅模拟一下。
+  - 原有的日志使用文件的形式记录在本地，非常占空间。后续结合 bash 脚本，定期对文件进行压缩后，虽然解决了一点问题，但是查询又变得的困难了。改进方案使用 es 和 kibana 对数据进行采集和记录，并根据不同的优先级，定期归档和清除。
+- 缓存的使用优化主要有两点：1、修改现有的野蛮的缓存结构。2、将高频但碎片的数据使用缓存进行暂存和合并，降低服务器的通信压力。

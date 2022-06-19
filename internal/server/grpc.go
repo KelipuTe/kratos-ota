@@ -4,9 +4,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	v1 "kratos-learning/api/ota/v1"
-	"kratos-learning/internal/conf"
-	"kratos-learning/internal/service"
+	v1 "kratos-ota/api/ota/v1"
+	"kratos-ota/internal/conf"
+	"kratos-ota/internal/service"
 )
 
 // NewGRPCServer new a gRPC server.

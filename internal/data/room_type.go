@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm/clause"
-	"kratos-learning/internal/biz"
+	"kratos-ota/internal/biz"
 	"math/rand"
 	"time"
 )

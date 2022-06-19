@@ -7,19 +7,17 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"kratos-learning/internal/biz"
-	"kratos-learning/internal/conf"
-	"kratos-learning/internal/data"
-	"kratos-learning/internal/server"
-	"kratos-learning/internal/service"
+	"kratos-ota/internal/biz"
+	"kratos-ota/internal/conf"
+	"kratos-ota/internal/data"
+	"kratos-ota/internal/service"
+	"kratos-ota/internal/task"
 )
 
 // Injectors from wire.go:
 
-// wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logger log.Logger) (*kratos.App, func(), error) {
+func wireCron(confData *conf.Data, auth *conf.Auth, logger log.Logger) (*task.OtaCron, func(), error) {
 	db := data.NewDB(confData, logger)
 	dataData, cleanup, err := data.NewData(confData, logger, db)
 	if err != nil {
@@ -29,10 +27,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	calendarRepo := data.NewCalendarRepo(dataData, logger)
 	otaUsecase := biz.NewOtaUsecase(roomTypeRepo, calendarRepo, auth, logger)
 	otaService := service.NewOtaService(otaUsecase)
-	httpServer := server.NewHTTPServer(confServer, auth, otaService, logger)
-	grpcServer := server.NewGRPCServer(confServer, otaService, logger)
-	app := newApp(logger, httpServer, grpcServer)
-	return app, func() {
+	otaCron := newCron(logger, otaService)
+	return otaCron, func() {
 		cleanup()
 	}, nil
 }

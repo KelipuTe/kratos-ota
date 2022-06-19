@@ -8,11 +8,11 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
-	v1 "kratos-learning/api/ota/v1"
-	"kratos-learning/internal/conf"
-	internalError "kratos-learning/internal/error"
-	"kratos-learning/internal/pkg/middleware/auth"
-	"kratos-learning/internal/service"
+	v1 "kratos-ota/api/ota/v1"
+	"kratos-ota/internal/conf"
+	internalError "kratos-ota/internal/error"
+	"kratos-ota/internal/pkg/middleware/auth"
+	"kratos-ota/internal/service"
 	netHttp "net/http"
 )
 

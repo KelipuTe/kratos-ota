@@ -10,7 +10,7 @@ service Ota {
     rpc GetToken (GetTokenRequest) returns (GetTokenReply) {
         option (google.api.http) = {
             post: "/api/v1/get_token"
-            body:"*"
+            body: "*"
         };
     }
     rpc GetHotelRoomType (GetHotelRoomTypeRequest) returns (GetHotelRoomTypeReply) {
@@ -23,7 +23,28 @@ service Ota {
             get: "/api/v1/ota/list_hotel_room_type"
         };
     }
+    rpc PushCalendar (PushCalendarRequest) returns (PushCalendarReply) {
+        option (google.api.http) = {
+            post: "/api/v1/ota/push_calendar"
+            body: "*"
+        };
+    }
 }
+
+// 内置模型
+
+message RoomType {
+    string room_type_id = 1;
+    string room_type_name = 2;
+}
+
+message Calendar {
+    string date = 1;
+    int32 num = 2;
+    int32 price = 3;
+}
+
+// 接口模型
 
 message GetTokenRequest {
     string client_id = 1;
@@ -33,11 +54,6 @@ message GetTokenRequest {
 message GetTokenReply {
     string client_id = 1;
     string token = 2;
-}
-
-message RoomType {
-    string room_type_id = 1;
-    string room_type_name = 2;
 }
 
 message GetHotelRoomTypeRequest {
@@ -61,4 +77,20 @@ message ListHotelRoomTypeReply {
     string ota = 1;
     string hotel_id = 2;
     repeated RoomType room_type_list = 3;
+}
+
+message PushCalendarRequest {
+    string ota = 1;
+    string hotel_id = 2;
+    string room_type_id = 3;
+    int32 sync_type = 4;
+    repeated Calendar calendar_list = 5;
+    string create_time = 6;
+}
+
+message PushCalendarReply {
+    string ota = 1;
+    string hotel_id = 2;
+    string room_type_id = 3;
+    string flow_id = 5;
 }

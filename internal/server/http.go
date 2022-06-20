@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -53,6 +54,7 @@ func NewHTTPServer(c *conf.Server, cauth *conf.Auth, ota *service.OtaService, lo
 		),
 		http.Middleware(
 			recovery.Recovery(),
+			metadata.Server(),
 			// JWT 鉴权
 			selector.Server(auth.JWTAuth(cauth.Jwt.SecretKey)).Match(NewSkipRouterMatcher()).Build(),
 		),

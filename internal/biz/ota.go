@@ -7,6 +7,7 @@ import (
 	v1 "kratos-ota/api/ota/v1"
 	"kratos-ota/internal/conf"
 	"kratos-ota/internal/pkg/middleware/auth"
+	"time"
 )
 
 var (
@@ -31,11 +32,29 @@ type RoomType struct {
 	RoomTypeName string
 }
 
+type CalendarQueue struct {
+	Ota                string
+	HotelId            string
+	RoomTypeId         string
+	SyncType           int
+	CreateTime         time.Time
+	Arr1P1CalendarDetail []*CalendarDetail
+	FlowId             string
+}
+
+type CalendarDetail struct {
+	Date  time.Time
+	Num   int
+	Price int
+}
+
 type RoomTypeRepo interface {
 	GetHotelRoomType(ctx context.Context, p1h *Hotel) error
 }
 
 type CalendarRepo interface {
+	SaveCalendarDetail(ctx context.Context, p1cq *CalendarQueue) error
+	SaveCalendarQueue(ctx context.Context, p1cq *CalendarQueue) error
 }
 
 type OtaUsecase struct {
@@ -61,8 +80,17 @@ func (ouc *OtaUsecase) GetToken(ctx context.Context, p1t *Token) error {
 }
 
 func (ouc *OtaUsecase) GetHotelRoomType(ctx context.Context, p1h *Hotel) error {
-	err := ouc.rtr.GetHotelRoomType(ctx, p1h)
-	if err != nil {
+	if err := ouc.rtr.GetHotelRoomType(ctx, p1h); err != nil {
+	}
+
+	return nil
+}
+
+func (ouc *OtaUsecase) PushCalendar(ctx context.Context, p1cq *CalendarQueue) error {
+	if err := ouc.cr.SaveCalendarDetail(ctx, p1cq); err != nil {
+	}
+
+	if err := ouc.cr.SaveCalendarQueue(ctx, p1cq); err != nil {
 	}
 
 	return nil

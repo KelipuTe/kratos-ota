@@ -70,8 +70,37 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ota.v1.ListHotelRoomTypeReply'
+    /api/v1/ota/push_calendar:
+        post:
+            tags:
+                - Ota
+            operationId: Ota_PushCalendar
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ota.v1.PushCalendarRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ota.v1.PushCalendarReply'
 components:
     schemas:
+        ota.v1.Calendar:
+            type: object
+            properties:
+                date:
+                    type: string
+                num:
+                    type: integer
+                    format: int32
+                price:
+                    type: integer
+                    format: int32
         ota.v1.GetHotelRoomTypeReply:
             type: object
             properties:
@@ -106,6 +135,35 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/ota.v1.RoomType'
+        ota.v1.PushCalendarReply:
+            type: object
+            properties:
+                ota:
+                    type: string
+                hotelId:
+                    type: string
+                roomTypeId:
+                    type: string
+                flowId:
+                    type: string
+        ota.v1.PushCalendarRequest:
+            type: object
+            properties:
+                ota:
+                    type: string
+                hotelId:
+                    type: string
+                roomTypeId:
+                    type: string
+                syncType:
+                    type: integer
+                    format: int32
+                calendarList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ota.v1.Calendar'
+                createTime:
+                    type: string
         ota.v1.RoomType:
             type: object
             properties:

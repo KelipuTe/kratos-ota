@@ -20,11 +20,13 @@ const _ = http.SupportPackageIsVersion1
 const OperationOtaGetToken = "/ota.v1.Ota/GetToken"
 const OperationOtaGetHotelRoomType = "/ota.v1.Ota/GetHotelRoomType"
 const OperationOtaListHotelRoomType = "/ota.v1.Ota/ListHotelRoomType"
+const OperationOtaPushCalendar = "/ota.v1.Ota/PushCalendar"
 
 type OtaHTTPServer interface {
 	GetHotelRoomType(context.Context, *GetHotelRoomTypeRequest) (*GetHotelRoomTypeReply, error)
 	GetToken(context.Context, *GetTokenRequest) (*GetTokenReply, error)
 	ListHotelRoomType(context.Context, *ListHotelRoomTypeRequest) (*ListHotelRoomTypeReply, error)
+	PushCalendar(context.Context, *PushCalendarRequest) (*PushCalendarReply, error)
 }
 
 func RegisterOtaHTTPServer(s *http.Server, srv OtaHTTPServer) {
@@ -32,6 +34,7 @@ func RegisterOtaHTTPServer(s *http.Server, srv OtaHTTPServer) {
 	r.POST("/api/v1/get_token", _Ota_GetToken0_HTTP_Handler(srv))
 	r.GET("/api/v1/ota/get_hotel_room_type", _Ota_GetHotelRoomType0_HTTP_Handler(srv))
 	r.GET("/api/v1/ota/list_hotel_room_type", _Ota_ListHotelRoomType0_HTTP_Handler(srv))
+	r.POST("/api/v1/ota/push_calendar", _Ota_PushCalendar0_HTTP_Handler(srv))
 }
 
 func _Ota_GetToken0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Context) error {
@@ -91,10 +94,30 @@ func _Ota_ListHotelRoomType0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Conte
 	}
 }
 
+func _Ota_PushCalendar0_HTTP_Handler(srv OtaHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PushCalendarRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOtaPushCalendar)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PushCalendar(ctx, req.(*PushCalendarRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PushCalendarReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type OtaHTTPClient interface {
 	GetHotelRoomType(ctx context.Context, req *GetHotelRoomTypeRequest, opts ...http.CallOption) (rsp *GetHotelRoomTypeReply, err error)
 	GetToken(ctx context.Context, req *GetTokenRequest, opts ...http.CallOption) (rsp *GetTokenReply, err error)
 	ListHotelRoomType(ctx context.Context, req *ListHotelRoomTypeRequest, opts ...http.CallOption) (rsp *ListHotelRoomTypeReply, err error)
+	PushCalendar(ctx context.Context, req *PushCalendarRequest, opts ...http.CallOption) (rsp *PushCalendarReply, err error)
 }
 
 type OtaHTTPClientImpl struct {
@@ -138,6 +161,19 @@ func (c *OtaHTTPClientImpl) ListHotelRoomType(ctx context.Context, in *ListHotel
 	opts = append(opts, http.Operation(OperationOtaListHotelRoomType))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *OtaHTTPClientImpl) PushCalendar(ctx context.Context, in *PushCalendarRequest, opts ...http.CallOption) (*PushCalendarReply, error) {
+	var out PushCalendarReply
+	pattern := "/api/v1/ota/push_calendar"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationOtaPushCalendar))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

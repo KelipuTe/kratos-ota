@@ -25,6 +25,7 @@ type OtaClient interface {
 	GetToken(ctx context.Context, in *GetTokenRequest, opts ...grpc.CallOption) (*GetTokenReply, error)
 	GetHotelRoomType(ctx context.Context, in *GetHotelRoomTypeRequest, opts ...grpc.CallOption) (*GetHotelRoomTypeReply, error)
 	ListHotelRoomType(ctx context.Context, in *ListHotelRoomTypeRequest, opts ...grpc.CallOption) (*ListHotelRoomTypeReply, error)
+	PushCalendar(ctx context.Context, in *PushCalendarRequest, opts ...grpc.CallOption) (*PushCalendarReply, error)
 }
 
 type otaClient struct {
@@ -62,6 +63,15 @@ func (c *otaClient) ListHotelRoomType(ctx context.Context, in *ListHotelRoomType
 	return out, nil
 }
 
+func (c *otaClient) PushCalendar(ctx context.Context, in *PushCalendarRequest, opts ...grpc.CallOption) (*PushCalendarReply, error) {
+	out := new(PushCalendarReply)
+	err := c.cc.Invoke(ctx, "/ota.v1.Ota/PushCalendar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OtaServer is the server API for Ota service.
 // All implementations must embed UnimplementedOtaServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type OtaServer interface {
 	GetToken(context.Context, *GetTokenRequest) (*GetTokenReply, error)
 	GetHotelRoomType(context.Context, *GetHotelRoomTypeRequest) (*GetHotelRoomTypeReply, error)
 	ListHotelRoomType(context.Context, *ListHotelRoomTypeRequest) (*ListHotelRoomTypeReply, error)
+	PushCalendar(context.Context, *PushCalendarRequest) (*PushCalendarReply, error)
 	mustEmbedUnimplementedOtaServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedOtaServer) GetHotelRoomType(context.Context, *GetHotelRoomTyp
 }
 func (UnimplementedOtaServer) ListHotelRoomType(context.Context, *ListHotelRoomTypeRequest) (*ListHotelRoomTypeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListHotelRoomType not implemented")
+}
+func (UnimplementedOtaServer) PushCalendar(context.Context, *PushCalendarRequest) (*PushCalendarReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PushCalendar not implemented")
 }
 func (UnimplementedOtaServer) mustEmbedUnimplementedOtaServer() {}
 
@@ -152,6 +166,24 @@ func _Ota_ListHotelRoomType_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ota_PushCalendar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PushCalendarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OtaServer).PushCalendar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ota.v1.Ota/PushCalendar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OtaServer).PushCalendar(ctx, req.(*PushCalendarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Ota_ServiceDesc is the grpc.ServiceDesc for Ota service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var Ota_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListHotelRoomType",
 			Handler:    _Ota_ListHotelRoomType_Handler,
+		},
+		{
+			MethodName: "PushCalendar",
+			Handler:    _Ota_PushCalendar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

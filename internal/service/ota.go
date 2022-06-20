@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/metadata"
 	v1 "kratos-ota/api/ota/v1"
 	"kratos-ota/internal/biz"
+	"kratos-ota/internal/conf"
+	"time"
 )
 
 type OtaService struct {
@@ -61,6 +64,41 @@ func (s *OtaService) GetHotelRoomType(ctx context.Context, in *v1.GetHotelRoomTy
 	}, nil
 }
 
-func (s *OtaService) CalendarJob()  {
+func (s *OtaService) PushCalendar(ctx context.Context, in *v1.PushCalendarRequest) (*v1.PushCalendarReply, error) {
+	var flowId string
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		flowId = md.Get("x-md-global-flowid")
+	}
+
+	t1CreateTime, _ := time.ParseInLocation(conf.FORMAT_YMD, in.CreateTime, time.Local)
+	p1c := &biz.CalendarQueue{
+		Ota:                  in.Ota,
+		HotelId:              in.HotelId,
+		RoomTypeId:           in.RoomTypeId,
+		SyncType:             int(in.SyncType),
+		CreateTime:           t1CreateTime,
+		Arr1P1CalendarDetail: make([]*biz.CalendarDetail, len(in.CalendarList)),
+		FlowId:               flowId,
+	}
+	for i := 0; i < len(in.CalendarList); i++ {
+		t1Date, _ := time.ParseInLocation(conf.FORMAT_YMD, in.CalendarList[i].Date, time.Local)
+		p1c.Arr1P1CalendarDetail[i] = &biz.CalendarDetail{
+			Date:  t1Date,
+			Num:   int(in.CalendarList[i].Num),
+			Price: int(in.CalendarList[i].Price),
+		}
+	}
+
+	s.ouc.PushCalendar(ctx, p1c)
+
+	return &v1.PushCalendarReply{
+		Ota:        in.Ota,
+		HotelId:    in.HotelId,
+		RoomTypeId: in.RoomTypeId,
+		FlowId:     flowId,
+	}, nil
+}
+
+func (s *OtaService) CalendarJob() {
 	fmt.Println("CalendarJob")
 }

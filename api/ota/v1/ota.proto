@@ -85,7 +85,7 @@ message PushCalendarRequest {
     string room_type_id = 3;
     int32 sync_type = 4;
     repeated Calendar calendar_list = 5;
-    string create_time = 6;
+    string create_at = 6;
 }
 
 message PushCalendarReply {

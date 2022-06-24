@@ -162,7 +162,7 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/ota.v1.Calendar'
-                createTime:
+                createAt:
                     type: string
         ota.v1.RoomType:
             type: object

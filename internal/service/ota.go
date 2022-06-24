@@ -14,13 +14,18 @@ import (
 type OtaService struct {
 	v1.UnimplementedOtaServer
 	ouc *biz.OtaUsecase
+
+	calendarJobStatus bool
 }
 
 // NewOtaService
 // api 层 --> service 层 --> biz 层
 // service 层应该把 api 层的数据结构转换成 biz 层的数据结构
 func NewOtaService(ouc *biz.OtaUsecase) *OtaService {
-	return &OtaService{ouc: ouc}
+	return &OtaService{
+		ouc:               ouc,
+		calendarJobStatus: false,
+	}
 }
 
 func (s *OtaService) GetToken(ctx context.Context, in *v1.GetTokenRequest) (*v1.GetTokenReply, error) {
@@ -48,10 +53,9 @@ func (s *OtaService) GetHotelRoomType(ctx context.Context, in *v1.GetHotelRoomTy
 			{RoomTypeId: in.RoomTypeId},
 		},
 	}
-	err := s.ouc.GetHotelRoomType(ctx, p1h)
 
-	if err != nil {
-		return nil, errors.New(500, err.Error(), err.Error())
+	if err := s.ouc.GetHotelRoomType(ctx, p1h); nil != err {
+		return nil, err
 	}
 
 	return &v1.GetHotelRoomTypeReply{
@@ -70,15 +74,25 @@ func (s *OtaService) PushCalendar(ctx context.Context, in *v1.PushCalendarReques
 		flowId = md.Get("x-md-global-flowid")
 	}
 
-	t1CreateTime, _ := time.ParseInLocation(conf.FORMAT_YMD, in.CreateTime, time.Local)
+	p1h := &biz.Hotel{
+		Ota:     in.Ota,
+		HotelId: in.HotelId,
+		Arr1RoomType: []biz.RoomType{
+			{RoomTypeId: in.RoomTypeId},
+		},
+	}
+
+	if err := s.ouc.GetHotelRoomType(ctx, p1h); nil != err {
+		return nil, err
+	}
+
+	t1CreateAt, _ := time.ParseInLocation(conf.FORMAT_YMDHIS, in.CreateAt, time.Local)
 	p1c := &biz.CalendarQueue{
-		Ota:                  in.Ota,
-		HotelId:              in.HotelId,
-		RoomTypeId:           in.RoomTypeId,
-		SyncType:             int(in.SyncType),
-		CreateTime:           t1CreateTime,
-		Arr1P1CalendarDetail: make([]*biz.CalendarDetail, len(in.CalendarList)),
 		FlowId:               flowId,
+		RoomTypeId:           p1h.Arr1RoomType[0].Id,
+		SyncType:             int(in.SyncType),
+		CreateAt:             t1CreateAt,
+		Arr1P1CalendarDetail: make([]*biz.CalendarDetail, len(in.CalendarList)),
 	}
 	for i := 0; i < len(in.CalendarList); i++ {
 		t1Date, _ := time.ParseInLocation(conf.FORMAT_YMD, in.CalendarList[i].Date, time.Local)
@@ -101,4 +115,27 @@ func (s *OtaService) PushCalendar(ctx context.Context, in *v1.PushCalendarReques
 
 func (s *OtaService) CalendarJob() {
 	fmt.Println("CalendarJob")
+
+	if s.calendarJobStatus {
+		return
+	}
+
+	go func() {
+		defer func() {
+			recover()
+			s.calendarJobStatus = false
+		}()
+
+		s.calendarJobStatus = true
+
+		for {
+			// 无限循环
+			ctx := context.Background()
+			hasQueue := s.ouc.ExecCalendar(ctx)
+			if !hasQueue {
+				// 如果没有队列就延时 1 秒
+				time.Sleep(time.Second)
+			}
+		}
+	}()
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm/clause"
+	"kratos-ota/api/ota/v1"
 	"kratos-ota/internal/biz"
 	"math/rand"
 	"time"
@@ -23,6 +24,7 @@ func NewRoomTypeRepo(data *Data, logger log.Logger) biz.RoomTypeRepo {
 }
 
 type RoomType struct {
+	Id           int
 	Ota          string
 	HotelId      string
 	RoomTypeId   string
@@ -39,7 +41,10 @@ func (r *roomTypeRepo) GetHotelRoomType(ctx context.Context, p1h *biz.Hotel) err
 		HotelId:    p1h.HotelId,
 		RoomTypeId: p1h.Arr1RoomType[0].RoomTypeId,
 	}
-	r.data.db.Where(p1rt).First(p1rt)
+	if tx := r.data.db.Where(p1rt).First(p1rt); nil != tx.Error {
+		return v1.ErrorRoomTypeNotFound("room type id %s not found", p1h.Arr1RoomType[0].RoomTypeId)
+	}
+	p1h.Arr1RoomType[0].Id = p1rt.Id
 	p1h.Arr1RoomType[0].RoomTypeName = p1rt.RoomTypeName
 	return nil
 }
@@ -62,9 +67,7 @@ func (r *roomTypeRepo) TestCreateRoomTypeMock() {
 			}
 			arr1RoomType[j].RoomTypeName = string(b)
 		}
-		tx := r.data.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(arr1RoomType, len(arr1RoomType))
-		if tx.Error != nil {
-			fmt.Println(tx.Error)
+		if tx := r.data.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(arr1RoomType, len(arr1RoomType)); nil != tx.Error {
 		}
 	}
 }

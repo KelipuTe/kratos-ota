@@ -40,9 +40,9 @@ func NewHTTPServer(c *conf.Server, cauth *conf.Auth, ota *service.OtaService, lo
 			// 过滤器
 			func(h netHttp.Handler) netHttp.Handler {
 				return netHttp.HandlerFunc(func(writer netHttp.ResponseWriter, request *netHttp.Request) {
-					spew.Dump("in")
+					spew.Dump("http.Filter in")
 					h.ServeHTTP(writer, request)
-					spew.Dump("out")
+					spew.Dump("http.Filter out")
 				})
 			},
 			// CORS 跨域

@@ -1,0 +1,38 @@
+CREATE TABLE `room_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `ota` varchar(16) NOT NULL,
+  `hotel_id` varchar(64) NOT NULL,
+  `room_type_id` varchar(64) NOT NULL,
+  `room_type_name` varchar(64) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `hotel_id` (`hotel_id`),
+  KEY `room_type_id` (`room_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=100033 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `calendar_queue` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `flow_id` varchar(64) NOT NULL,
+  `room_type_id` int NOT NULL,
+  `sync_type` tinyint NOT NULL,
+  `create_at` timestamp NOT NULL,
+  `status` tinyint DEFAULT '0',
+  `try_times` tinyint DEFAULT '0',
+  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '',
+  `update_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `room_type_id` (`room_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `calendar_detail` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `flow_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `room_type_id` int NOT NULL,
+  `date` date NOT NULL,
+  `num` int NOT NULL,
+  `price` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `flow_id` (`flow_id`),
+  KEY `room_type_id` (`room_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
